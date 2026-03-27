@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistical Analysis Report — Medical Insurance Costs</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11.5pt;
+    line-height: 1.7;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 50px;
+  }
+  h1 { font-size: 18pt; margin-bottom: 4px; line-height: 1.3; }
+  h2 { font-size: 13.5pt; margin: 28px 0 8px; border-bottom: 1.5px solid #444; padding-bottom: 4px; }
+  h3 { font-size: 11.5pt; font-style: italic; margin: 18px 0 6px; }
+  p { margin-bottom: 12px; }
+  .meta { font-size: 10pt; color: #555; margin-bottom: 30px; line-height: 1.6; }
+  .meta span { display: block; }
+  .toc { background: #f7f7f7; border: 1px solid #ddd; padding: 16px 22px; margin: 0 0 30px; }
+  .toc h3 { font-size: 11pt; margin: 0 0 8px; font-style: normal; font-weight: bold; }
+  .toc ol { margin-left: 20px; }
+  .toc li { margin: 3px 0; font-size: 10.5pt; }
+  .toc a { color: #24527a; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 10.5pt; }
+  th { background: #e8e8e8; padding: 6px 10px; text-align: left; border: 1px solid #bbb; }
+  td { padding: 5px 10px; border: 1px solid #ccc; }
+  tr:nth-child(even) td { background: #f8f8f8; }
+  .stat-box { background: #f0f4f8; border-left: 4px solid #24527a; padding: 12px 16px; margin: 14px 0; font-size: 10.5pt; }
+  .stat-box strong { display: block; margin-bottom: 4px; font-size: 11pt; }
+  .highlight { background: #fff8e1; padding: 2px 4px; border-radius: 2px; }
+  .references ol { margin-left: 22px; }
+  .references li { margin-bottom: 10px; font-size: 10.5pt; }
+  cite { font-style: normal; }
+  @media print {
+    body { padding: 20px 30px; }
+    .toc { break-after: avoid; }
+    h2 { break-before: avoid; break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Statistical Analysis Report<br>Medical Insurance Costs</h1>
+<div class="meta">
+  <span><strong>Author:</strong> Sébastien Bodrero</span>
+  <span><strong>Programme:</strong> MSc in Artificial Intelligence — Woolf University / Udacity</span>
+  <span><strong>Module 2:</strong> Data and Statistical Reasoning (Project 2)</span>
+  <span><strong>Date:</strong> March 2026</span>
+</div>
+
+<div class="toc">
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#dataset">Dataset Description</a></li>
+    <li><a href="#methods">Methods</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#nontechnical">Interpretation for a Non-Technical Audience</a></li>
+    <li><a href="#limitations">Limitations and Potential Bias</a></li>
+    <li><a href="#references">References</a></li>
+  </ol>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="overview">1. Overview</h2>
+
+<p>This report presents a complete statistical analysis of annual medical insurance charges for 1,338 US beneficiaries. The central question investigated is: <em>does smoking status significantly affect the medical insurance costs charged to individuals, and do charges differ meaningfully across US geographic regions?</em> The analysis uses the Medical Insurance Costs dataset, a publicly available dataset originally published on Kaggle and derived from the textbook <em>Machine Learning with R</em> by Brett Lantz; it is mirrored at <a href="https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/insurance.csv">github.com/stedy/Machine-Learning-with-R-datasets</a>. The approach follows best practices for initial data analysis as described by Noma et al. (2024), including early exploration of distributions and the explicit statement of assumptions before any inferential tests.</p>
+
+<!-- ================================================================ -->
+<h2 id="dataset">2. Dataset Description</h2>
+
+<p>The Medical Insurance Costs dataset represents individual insurance beneficiary records from a US insurance portfolio. It contains <strong>1,338 rows and 7 columns</strong>, with no missing values. The dataset includes four numeric variables — <em>age</em> (18–64 years), <em>body-mass index</em> (BMI; 15.96–53.13), <em>number of children/dependants</em> (0–5), and <em>annual insurance charges</em> (USD; the primary outcome) — as well as three categorical variables: <em>sex</em> (male/female), <em>smoker</em> (yes/no), and <em>region</em> (northeast, northwest, southeast, southwest). This dataset satisfies all project requirements: it exceeds 500 rows, contains six or more columns with both numeric and categorical variables, is publicly available, is not synthetic, and was not used in Module 1 (which used the NYC Airbnb 2019 dataset). The key variable examined is <em>charges</em>, examined across groups defined by smoker status and region.</p>
+
+<table>
+  <thead>
+    <tr><th>Column</th><th>Type</th><th>Description</th><th>Range / Values</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>age</td><td>Integer</td><td>Age of primary beneficiary</td><td>18–64 years</td></tr>
+    <tr><td>sex</td><td>String</td><td>Sex of beneficiary</td><td>male, female</td></tr>
+    <tr><td>bmi</td><td>Float</td><td>Body-mass index</td><td>15.96–53.13</td></tr>
+    <tr><td>children</td><td>Integer</td><td>Number of dependants</td><td>0–5</td></tr>
+    <tr><td>smoker</td><td>String</td><td>Smoking status</td><td>yes, no</td></tr>
+    <tr><td>region</td><td>String</td><td>US residential region</td><td>NE, NW, SE, SW</td></tr>
+    <tr><td>charges</td><td>Float</td><td>Annual insurance cost (USD)</td><td>$1,122–$63,770</td></tr>
+  </tbody>
+</table>
+
+<!-- ================================================================ -->
+<h2 id="methods">3. Methods</h2>
+
+<h3>3.1 Descriptive Statistics</h3>
+
+<p>Descriptive statistics were computed using <code>df.describe()</code> for numeric variables and <code>value_counts()</code> for categorical variables. Per-group summaries (mean, median, standard deviation) were calculated using <code>groupby</code> aggregations. Descriptive statistics were chosen because they provide the essential foundation for any statistical analysis — they reveal the shape, central tendency, spread, and categorical composition of the data before any inferential step is taken (Adhikari, 2022). The large gap between the mean and median of <em>charges</em> (mean = $13,270; median = $9,382) was the key diagnostic indicator of right-skewness, which directly informed both the visualisation choices and the test selection.</p>
+
+<h3>3.2 Visualisations</h3>
+
+<p><strong>Histogram of charges:</strong> A histogram was chosen to directly visualise the distribution shape of the primary outcome variable. Mean and median reference lines were added to make the degree of skewness immediately apparent. The bin count (40) was set to balance granularity and readability.</p>
+
+<p><strong>Boxplot of charges by smoker status:</strong> A side-by-side boxplot was chosen to compare the distributional properties (median, IQR, outliers) of insurance charges between the two smoking groups simultaneously. Boxplots are more informative than bar charts for comparing skewed distributions because they convey central tendency, spread, and outlier presence in a single graphic.</p>
+
+<p><strong>Scatterplot of age vs. charges, coloured by smoker status:</strong> A scatterplot was selected to reveal the joint relationship between the two most important continuous predictors (age and charges) while simultaneously encoding smoking status via colour. This choice was motivated by the hypothesis that age is a secondary driver of costs within each smoking stratum, a pattern that a scatterplot can reveal in a way that no summary table can.</p>
+
+<h3>3.3 Hypothesis Tests</h3>
+
+<p><strong>Welch's independent-samples t-test (smoker vs. non-smoker):</strong> The independent-samples t-test was selected to compare mean charges between smokers and non-smokers because the two groups are independent, the outcome variable is continuous, and both groups have sufficient sample sizes (n<sub>smokers</sub> = 274; n<sub>non-smokers</sub> = 1,064) for the Central Limit Theorem to ensure approximate normality of the sampling distribution of the mean, even under the right-skewed raw distribution (Noma et al., 2024). Welch's variant (<code>equal_var=False</code>) was used rather than the pooled-variance Student's t-test because the descriptive statistics showed substantially different standard deviations between groups (SD<sub>smokers</sub> = $11,542 vs. SD<sub>non-smokers</sub> = $5,994). The test was conducted as one-sided (H₁: μ<sub>smokers</sub> &gt; μ<sub>non-smokers</sub>) because the research question and prior descriptive evidence clearly indicated a directional expectation. The significance level was set at α = 0.05, the conventional threshold in biomedical research (Kwak &amp; Kim, 2017).</p>
+
+<p><strong>One-way ANOVA (charges by region):</strong> A one-way ANOVA was chosen to test for mean differences across the four US regions because ANOVA is the natural extension of the t-test to more than two independent groups. The four groups (regions) contain between 324 and 364 observations each — a sufficiently balanced design that makes ANOVA robust to moderate violations of normality (Kwak &amp; Kim, 2017). The significance level was also α = 0.05.</p>
+
+<p><strong>Assumptions:</strong> For the t-test: (i) independence of observations — satisfied by the cross-sectional nature of the data; (ii) approximate normality of group means — ensured by the Central Limit Theorem at the achieved sample sizes; (iii) independence of the two groups — satisfied. For the ANOVA: same assumptions plus homogeneity of variances across groups, which should be interpreted cautiously given that the southeast group has a notably higher standard deviation than other regions.</p>
+
+<!-- ================================================================ -->
+<h2 id="results">4. Results</h2>
+
+<h3>4.1 Descriptive Statistics</h3>
+
+<div class="stat-box">
+  <strong>Summary Statistics for Annual Charges</strong>
+  Mean = $13,270.42 &nbsp;|&nbsp; Median = $9,382.03 &nbsp;|&nbsp; SD = $12,110.01 &nbsp;|&nbsp; Min = $1,121.87 &nbsp;|&nbsp; Max = $63,770.43
+</div>
+
+<p>The distribution of <em>charges</em> is strongly right-skewed, as evidenced by the mean being approximately $3,888 higher than the median. The histogram (Figure 1 in the notebook) confirms this pattern, with most observations concentrated below $20,000 and a long tail extending beyond $60,000.</p>
+
+<table>
+  <thead>
+    <tr><th>Smoker Status</th><th>n</th><th>Mean Charges</th><th>Median Charges</th><th>SD</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>No</td><td>1,064</td><td>$8,434.27</td><td>$7,345.41</td><td>$5,993.78</td></tr>
+    <tr><td>Yes</td><td>274</td><td>$32,050.23</td><td>$34,456.35</td><td>$11,541.55</td></tr>
+  </tbody>
+</table>
+
+<p>Smokers (n = 274; 20.5% of the sample) have a mean annual charge of <strong>$32,050</strong>, compared to <strong>$8,434</strong> for non-smokers — a raw difference of approximately $23,616, or roughly 3.8 times higher. The boxplot (Figure 2 in the notebook) makes this separation visually unmistakable: the lower quartile of smoker charges ($20,009) lies above the upper quartile of non-smoker charges ($16,640).</p>
+
+<table>
+  <thead>
+    <tr><th>Region</th><th>n</th><th>Mean Charges</th><th>Median Charges</th><th>SD</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Northeast</td><td>324</td><td>$13,406.38</td><td>$10,057.65</td><td>$11,255.80</td></tr>
+    <tr><td>Northwest</td><td>325</td><td>$12,417.58</td><td>$8,965.80</td><td>$11,072.28</td></tr>
+    <tr><td>Southeast</td><td>364</td><td>$14,735.41</td><td>$9,294.13</td><td>$13,971.10</td></tr>
+    <tr><td>Southwest</td><td>325</td><td>$12,346.94</td><td>$8,798.59</td><td>$11,557.18</td></tr>
+  </tbody>
+</table>
+
+<p>Regional differences in mean charges are modest compared to the smoking effect. The Southeast shows the highest mean ($14,735) and the Southwest the lowest ($12,347), a spread of approximately $2,388 — roughly one-tenth of the smoker–non-smoker gap.</p>
+
+<h3>4.2 Hypothesis Test Results</h3>
+
+<div class="stat-box">
+  <strong>Test 1: Welch's t-test — Smoker vs. Non-Smoker Charges (one-sided)</strong>
+  t(350.89) = 32.75, p = 2.94 × 10<sup>−103</sup> &nbsp;|&nbsp; Decision: <strong>Reject H₀</strong> at α = 0.05
+</div>
+
+<p>The test yields an extraordinarily large t-statistic (t = 32.75) and a p-value that is effectively zero (p = 2.94 × 10<sup>−103</sup>), far below the α = 0.05 threshold. We reject H₀ and conclude that smokers incur statistically significantly higher annual insurance charges than non-smokers. This result is consistent with the extensive body of evidence linking smoking to greater healthcare costs and morbidity.</p>
+
+<div class="stat-box">
+  <strong>Test 2: One-Way ANOVA — Charges by Region</strong>
+  F(3, 1334) = 2.97, p = 0.0309 &nbsp;|&nbsp; Decision: <strong>Reject H₀</strong> at α = 0.05
+</div>
+
+<p>The ANOVA yields F = 2.97 with p = 0.0309, which falls below α = 0.05. We therefore reject H₀ and conclude that at least one region has a mean charge that differs significantly from the others. However, the effect is modest: the F-statistic is much smaller than for the smoking comparison, and the practical magnitude of regional differences (approximately $2,400 range in means) is considerably smaller. The Southeast region, which has both the highest mean charge and the largest standard deviation, appears to be the primary driver of this result. This regional finding should be interpreted with caution, as the Southeast also has the largest number of smokers (see limitations below).</p>
+
+<!-- ================================================================ -->
+<h2 id="nontechnical">5. Interpretation for a Non-Technical Audience</h2>
+
+<p>Imagine you are comparing the annual medical bills of two neighbours — one who smokes and one who does not. On average, this analysis found that the smoker's insurance company is billed approximately <strong>$23,600 more per year</strong> than the non-smoker's. This is not a coincidence. When we applied a statistical test designed to measure whether this difference could plausibly be explained by random chance alone, the result was clear: the probability that this gap is due to chance is essentially zero (less than 1 in 10<sup>100</sup>). Smoking is, by far, the single biggest driver of high insurance costs in this dataset.</p>
+
+<p>We also asked whether people living in different parts of the United States pay different amounts. The answer is: yes, but only slightly. People in the Southeast tend to pay a little more on average — about $2,400 more per year than those in the Southwest — and this difference is statistically significant. However, it is much smaller than the smoking effect and may partly reflect the fact that there are more smokers in the Southeast in this dataset.</p>
+
+<p>In plain terms: <strong>if an insurance company wanted to predict whether a beneficiary would be expensive to cover, the first question they should ask is whether that person smokes.</strong> Where the person lives matters, but much less so.</p>
+
+<!-- ================================================================ -->
+<h2 id="limitations">6. Limitations and Potential Bias</h2>
+
+<h3>6.1 Dataset Limitations</h3>
+
+<p><strong>Unknown provenance and currency:</strong> The dataset was originally distributed as supplementary material for a machine learning textbook (<em>Machine Learning with R</em> by Brett Lantz) and does not carry an explicit collection date, data source, or sampling methodology. It is unclear whether the 1,338 records represent a random sample, a convenience sample, or simulated data calibrated to real-world distributions. This makes it impossible to generalise the findings to a specific real-world population with confidence. Furthermore, insurance pricing structures, healthcare costs, and smoking rates change over time; the data may no longer reflect current insurance market conditions.</p>
+
+<p><strong>Limited covariates:</strong> The dataset includes only seven variables. Important potential confounders — such as pre-existing conditions, exercise habits, alcohol consumption, employment type, or income level — are absent. Without controlling for these variables, the analysis cannot establish a causal relationship between smoking and charges; it can only identify statistical association. For example, smokers may be more likely to hold certain occupations or have comorbid conditions that independently increase healthcare costs.</p>
+
+<h3>6.2 Potential Sources of Bias</h3>
+
+<p><strong>Confounding in regional analysis:</strong> The Southeast region has the largest proportion of smokers in this dataset (relative to other regions). If regional smoking prevalence differs, then observed regional differences in mean charges may be partly or wholly attributable to the confounding effect of smoking status rather than genuine geographic variation in healthcare costs. A more rigorous analysis would control for smoking status when comparing regions (e.g., using analysis of covariance or multiple regression).</p>
+
+<p><strong>Representativeness and self-selection:</strong> Insurance datasets are subject to selection bias: individuals with higher risk profiles (e.g., heavy smokers with chronic conditions) may be under- or over-represented depending on how the insurer's portfolio was constructed. If the dataset over-represents high-risk smokers, the estimated smoker–non-smoker charge gap may be inflated relative to the general population.</p>
+
+<p><strong>Binary smoking variable:</strong> The <em>smoker</em> variable is binary (yes/no) and provides no information on smoking intensity (number of cigarettes per day), duration, or whether the beneficiary has recently quit. This coarseness means that the analysis treats a casual, occasional smoker the same as a heavy, long-term smoker, which may artificially inflate within-group variance and understate the true dose–response relationship between smoking intensity and charges.</p>
+
+<!-- ================================================================ -->
+<h2 id="references">7. References</h2>
+
+<div class="references">
+<ol>
+  <li>
+    Adhikari, N. K. J. (2022). <em>Reproducible data science with Python: An open learning resource</em>. ResearchGate. <a href="https://doi.org/10.13140/RG.2.2.22099.04641">https://doi.org/10.13140/RG.2.2.22099.04641</a>
+  </li>
+  <li>
+    Kwak, S. G., &amp; Kim, J. H. (2017). Central limit theorem: The cornerstone of modern statistics. <em>Korean Journal of Anesthesiology</em>, <em>70</em>(2), 144–156. <a href="https://doi.org/10.4097/kjae.2017.70.2.144">https://doi.org/10.4097/kjae.2017.70.2.144</a>
+  </li>
+  <li>
+    Noma, H., Maruo, K., Gosho, M., &amp; Hamada, C. (2024). Initial data analysis for longitudinal studies to build a solid foundation for reproducible analysis. <em>PLOS ONE</em>, <em>19</em>(1), e0295726. <a href="https://doi.org/10.1371/journal.pone.0295726">https://doi.org/10.1371/journal.pone.0295726</a>
+  </li>
+</ol>
+</div>
+
+</body>
+</html>
